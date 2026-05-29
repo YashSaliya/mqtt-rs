@@ -2,23 +2,22 @@ use std::sync::Arc;
 use tokio::net::TcpStream;
 use tokio::sync::{mpsc, oneshot, Mutex};
 use tokio::time::{timeout, Duration};
-use bytes::{Bytes, BytesMut, Buf};
+use bytes::{Bytes, BytesMut};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tracing::{debug, error, info, warn};
 
 use mqtt_core::{
     codec::{decode, encode},
     packet::{
-        connect::{Connect, ConnAck, ConnectReason},
+        connect::{Connect, ConnectReason},
         disconnect::Disconnect,
         ping::PingReq,
         puback::{PubAck, PubComp, PubRec, PubRel, PubReason},
         publish::Publish,
-        subscribe::{Subscribe, SubscriptionFilter, SubAck, RetainHandling},
-        unsubscribe::{Unsubscribe, UnsubAck},
+        subscribe::{Subscribe, SubscriptionFilter, RetainHandling},
+        unsubscribe::Unsubscribe,
         ControlPacket,
     },
-    properties::Properties,
     version::ProtocolVersion,
     QoS,
 };
@@ -135,8 +134,8 @@ impl ClientBuilder {
             pending_unsub: None,
             pending_puback: None,
             pending_pubrec: None,
-            pending_pubrel: None,
-            pending_pubcomp: None,
+            _pending_pubrel: None,
+            _pending_pubcomp: None,
         };
 
         client_handler.handshake().await?;
@@ -226,8 +225,8 @@ struct ClientHandler {
     pending_unsub: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
     pending_puback: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
     pending_pubrec: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
-    pending_pubrel: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
-    pending_pubcomp: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
+    _pending_pubrel: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
+    _pending_pubcomp: Option<(u16, oneshot::Sender<Result<(), anyhow::Error>>)>,
 }
 
 impl ClientHandler {
