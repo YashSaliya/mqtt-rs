@@ -1,5 +1,5 @@
-use std::collections::{HashMap, HashSet};
-use mqtt_core::{packet::subscribe::SubscriptionFilter, QoS};
+use std::collections::HashMap;
+use mqtt_core::QoS;
 
 #[derive(Debug, Clone)]
 pub struct Subscription {

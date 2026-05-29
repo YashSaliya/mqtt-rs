@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use tokio::net::TcpListener;
 use tokio::sync::mpsc;
 use tracing::{info, error, Level};
