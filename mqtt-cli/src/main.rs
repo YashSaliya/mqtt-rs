@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use bytes::Bytes;
 use mqtt_core::{QoS, version::ProtocolVersion};
-use mqtt_client::ClientBuilder;
+use mqtt_client_rs::ClientBuilder;
 
 #[derive(Parser)]
 #[command(name = "mqttcli")]

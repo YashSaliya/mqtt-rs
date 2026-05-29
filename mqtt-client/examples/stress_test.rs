@@ -1,7 +1,7 @@
 use std::time::Instant;
 use tokio::task::JoinSet;
 use mqtt_core::QoS;
-use mqtt_client::ClientBuilder;
+use mqtt_client_rs::ClientBuilder;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

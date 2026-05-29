@@ -37,4 +37,4 @@ clap = { version = "4", features = ["derive"] }
 
 # Internal crates
 mqtt-core = { path = "mqtt-core", version = "0.1.0" }
-mqtt-client = { path = "mqtt-client", version = "0.1.0" }
+mqtt-client-rs = { path = "mqtt-client", version = "0.1.0" }
