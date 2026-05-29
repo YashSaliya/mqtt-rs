@@ -19,6 +19,7 @@ RustMQ is structured as a robust Cargo workspace:
 - **Full QoS Implementation**: QoS `0` (At Most Once), QoS `1` (At Least Once), and QoS `2` (Exactly Once) supported on both publisher and subscriber connections.
 - **Shared Subscriptions**: MQTT 5.0 style shared subscriptions (`$share/group_name/topic`) supporting round-robin load balancing.
 - **Clean & Persistent Sessions**: Supports session state storage, offline queues for persistent connections, and session lifetime intervals.
+- **Pluggable Authentication Layer**: Custom `Authenticator` trait supporting `Anonymous`, `Basic` (username/password), and `Token` (JWT/API-keys) auth modes out-of-the-box.
 - **Telemetry & structured logs**: Integrates the `tracing` framework for high-fidelity server diagnostics.
 
 ---
@@ -67,6 +68,30 @@ cargo run -p mqtt-client --example stress_test
 To build and view the comprehensive API documentation for the entire project (including functions, types, and structs) in your browser:
 ```bash
 cargo doc --no-deps --open
+```
+
+---
+
+## 🔐 Pluggable Authentication
+RustMQ includes a flexible authentication structure (`Authenticator` trait) with three modes:
+- **Anonymous**: Unrestricted public access (default).
+- **Basic**: File/struct-backed username and password credentials database.
+- **Token**: Custom JWT / API-key validations passed inside the client's password field.
+
+To configure the auth mode, edit your `Config` settings:
+```rust
+let mut config = Config::default();
+config.auth_mode = AuthMode::Basic; // Basic | Token | Anonymous
+```
+
+---
+
+## 🧪 Test Suite & Coverage
+The codebase features standard-compliant, rigorous testing covering codecs, binary properties, wildcard matching, and the pluggable authenticator.
+
+To execute the test suite (26 active unit tests across the workspace):
+```bash
+cargo test
 ```
 
 ---

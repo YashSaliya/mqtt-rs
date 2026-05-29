@@ -8,6 +8,7 @@ An asynchronous, highly performant **MQTT 3.1.1 & MQTT 5.0 client library** buil
 - **Dual-Version Support**: Connect to any broker using either MQTT `3.1.1` or `5.0`.
 - **Full QoS Support**: Supports QoS `0` (At Most Once), QoS `1` (At Least Once), and QoS `2` (Exactly Once) delivery.
 - **Asynchronous Channels**: Native Tokio `mpsc` channel-based message delivery for seamless integration into async architectures.
+- **Pluggable Basic Authentication**: Authenticate using username & password credentials or custom token API keys seamlessly.
 - **Clean Handshakes**: Automatic keep-alive pingers and connection lifecycle management.
 
 ---
@@ -17,24 +18,25 @@ An asynchronous, highly performant **MQTT 3.1.1 & MQTT 5.0 client library** buil
 Add this to your `Cargo.toml` dependencies:
 ```toml
 [dependencies]
-mqtt-client-rs = "0.1.1"
+mqtt-client-rs = "0.1.3"
 ```
 
 ---
 
 ## 💻 Quick Start
 
-Here is a simple example showing how to connect, subscribe to a topic, and publish a message:
+Here is a simple example showing how to connect with credentials, subscribe to a topic, and publish a message:
 
 ```rust
 use mqtt_client_rs::{ClientBuilder, QoS, ProtocolVersion};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // 1. Configure and connect the client
+    // 1. Configure and connect the client with credentials
     let client = ClientBuilder::new("127.0.0.1", 1883)
         .client_id("example-client")
         .version(ProtocolVersion::V500) // Choose between V311 and V500
+        .credentials("yash", "securepassword") // Set credentials for Basic Auth!
         .connect()
         .await?;
 
@@ -63,6 +65,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.disconnect().await?;
     Ok(())
 }
+```
+
+---
+
+## ⚡ Stress Testing
+You can stress-test your client and broker connections concurrently. The crate includes an optimized benchmark example:
+```bash
+cargo run --example stress_test
 ```
 
 ---
