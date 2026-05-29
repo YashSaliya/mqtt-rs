@@ -1,7 +1,10 @@
 [package]
 name = "mqtt-client"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "An async MQTT 3.1.1 and 5.0 client library"
 
 [dependencies]
 tokio = { workspace = true }

@@ -1,7 +1,10 @@
 [package]
 name = "mqtt-cli"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "A command-line companion interface for the RustMQ broker"
 
 [dependencies]
 tokio = { workspace = true }
