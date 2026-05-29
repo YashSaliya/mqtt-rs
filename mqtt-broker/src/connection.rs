@@ -111,6 +111,8 @@ impl Connection {
             client_id: self.client_id.clone(),
             clean_session: connect.clean_start,
             session_expiry_interval: connect.properties.as_ref().and_then(|p| p.session_expiry_interval),
+            username: connect.username.clone(),
+            password: connect.password.clone(),
             tx: self.client_tx.clone(),
             respond_tx: auth_tx,
         }).await;

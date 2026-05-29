@@ -8,7 +8,7 @@ use crate::config::Config;
 use crate::topic_trie::{TopicTrie, Subscription};
 use crate::retained::RetainedStore;
 use crate::session::{Session, PendingPublish, SessionMessage};
-use crate::auth::AuthManager;
+use crate::auth::{create_authenticator, Authenticator};
 
 #[derive(Debug, Clone)]
 pub enum BrokerToClientMessage {
@@ -23,6 +23,8 @@ pub enum ClientToBrokerMessage {
         client_id: String,
         clean_session: bool,
         session_expiry_interval: Option<u32>,
+        username: Option<String>,
+        password: Option<Bytes>,
         tx: mpsc::Sender<BrokerToClientMessage>,
         respond_tx: mpsc::Sender<Result<bool, String>>, // returns if session was present
     },
@@ -74,27 +76,27 @@ pub struct Broker {
     sessions: HashMap<String, Session>,
     // client_id -> channel to the connection task
     active_connections: HashMap<String, mpsc::Sender<BrokerToClientMessage>>,
-    auth_manager: AuthManager,
+    authenticator: Box<dyn Authenticator>,
     // Shared subscription round-robin cursors: (group, topic_filter) -> index
     shared_cursors: HashMap<(String, String), usize>,
 }
 
 impl Broker {
     pub fn new(config: Config) -> Self {
-        let auth_manager = AuthManager::new(&config);
+        let authenticator = create_authenticator(&config);
         Self {
             config,
             topic_trie: TopicTrie::new(),
             retained_store: RetainedStore::new(),
             sessions: HashMap::new(),
             active_connections: HashMap::new(),
-            auth_manager,
+            authenticator,
             shared_cursors: HashMap::new(),
         }
     }
 
-    pub fn auth_manager(&self) -> &AuthManager {
-        &self.auth_manager
+    pub fn authenticator(&self) -> &dyn Authenticator {
+        self.authenticator.as_ref()
     }
 
     pub async fn run(mut self, mut rx: mpsc::Receiver<ClientToBrokerMessage>) {
@@ -105,11 +107,21 @@ impl Broker {
                     client_id,
                     clean_session,
                     session_expiry_interval,
+                    username,
+                    password,
                     tx,
                     respond_tx,
                 } => {
-                    let present = self.handle_connect(client_id, clean_session, session_expiry_interval, tx).await;
-                    let _ = respond_tx.send(Ok(present)).await;
+                    let authenticated = self.authenticator.authenticate(
+                        username.as_deref(),
+                        password.as_ref().map(|p| p.as_ref()),
+                    );
+                    if !authenticated {
+                        let _ = respond_tx.send(Err("Authentication failed".to_string())).await;
+                    } else {
+                        let present = self.handle_connect(client_id, clean_session, session_expiry_interval, tx).await;
+                        let _ = respond_tx.send(Ok(present)).await;
+                    }
                 }
                 ClientToBrokerMessage::Disconnect { client_id } => {
                     self.handle_disconnect(&client_id).await;
