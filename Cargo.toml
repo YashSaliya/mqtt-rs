@@ -8,7 +8,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["RustMQ"]
 license = "MIT"
@@ -36,5 +36,5 @@ toml = "0.8"
 clap = { version = "4", features = ["derive"] }
 
 # Internal crates
-mqtt-core = { path = "mqtt-core", version = "0.1.3" }
-mqtt-client-rs = { path = "mqtt-client", version = "0.1.3" }
+mqtt-core = { path = "mqtt-core", version = "0.1.4" }
+mqtt-client-rs = { path = "mqtt-client", version = "0.1.4" }
