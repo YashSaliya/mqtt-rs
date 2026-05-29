@@ -80,3 +80,72 @@ pub fn create_authenticator(config: &Config) -> Box<dyn Authenticator> {
         AuthMode::Token => Box::new(TokenAuthenticator::new(config)),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::UserConfig;
+
+    #[test]
+    fn test_anonymous_authenticator() {
+        let auth = AnonymousAuthenticator;
+        assert!(auth.authenticate(None, None));
+        assert!(auth.authenticate(Some("yash"), Some(b"pass123")));
+    }
+
+    #[test]
+    fn test_basic_authenticator() {
+        let mut config = Config::default();
+        config.users.push(UserConfig {
+            username: "yash".to_string(),
+            password: "securepassword".to_string(),
+        });
+        
+        let auth = BasicAuthenticator::new(&config);
+
+        // Correct credentials
+        assert!(auth.authenticate(Some("yash"), Some(b"securepassword")));
+
+        // Wrong password
+        assert!(!auth.authenticate(Some("yash"), Some(b"wrongpassword")));
+
+        // Non-existent user
+        assert!(!auth.authenticate(Some("unknown"), Some(b"securepassword")));
+
+        // Missing username
+        assert!(!auth.authenticate(None, Some(b"securepassword")));
+
+        // Missing password
+        assert!(!auth.authenticate(Some("yash"), None));
+    }
+
+    #[test]
+    fn test_token_authenticator() {
+        let mut config = Config::default();
+        config.tokens.push("jwt-token-12345".to_string());
+        
+        let auth = TokenAuthenticator::new(&config);
+
+        // Correct token in password field
+        assert!(auth.authenticate(None, Some(b"jwt-token-12345")));
+
+        // Wrong token
+        assert!(!auth.authenticate(None, Some(b"bad-token")));
+
+        // Missing token
+        assert!(!auth.authenticate(None, None));
+    }
+
+    #[test]
+    fn test_factory_creation() {
+        let mut config = Config::default();
+
+        config.auth_mode = AuthMode::Anonymous;
+        let auth = create_authenticator(&config);
+        assert!(auth.authenticate(None, None)); // Anonymous succeeds
+
+        config.auth_mode = AuthMode::Basic;
+        let auth = create_authenticator(&config);
+        assert!(!auth.authenticate(None, None)); // Basic fails without creds
+    }
+}
